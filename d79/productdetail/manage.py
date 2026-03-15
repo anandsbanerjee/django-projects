@@ -3,6 +3,7 @@
 import os
 import sys
 
+# D79: https://www.scaler.com/academy/mentee-dashboard/class/502366/session
 
 def main():
     """Run administrative tasks."""

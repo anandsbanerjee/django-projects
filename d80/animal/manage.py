@@ -3,6 +3,9 @@
 import os
 import sys
 
+# Day80 - https://www.scaler.com/academy/mentee-dashboard/class/502360/session?navref=cl_ftr
+# Day 81 - https://www.scaler.com/academy/mentee-dashboard/class/502369/session?navref=cl_ftr
+# Day82 - https://www.scaler.com/academy/mentee-dashboard/class/502364/session?navref=cl_ftr
 
 def main():
     """Run administrative tasks."""
