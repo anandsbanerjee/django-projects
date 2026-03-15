@@ -36,6 +36,12 @@ class Animal():
             if animal.id == id:
                 return animal
 
+class Weather():
+    objects = []
+    def __init__(self, city, temperature_celsius, temperature_fahrenheit):
+        self.city = city
+        self.temperature_celsius = temperature_celsius
+        self.temperature_fahrenheit = temperature_fahrenheit
 
 
 # Pre-populate with 3 objects
