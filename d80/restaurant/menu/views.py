@@ -1,6 +1,10 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from rest_framework import viewsets
+
 from .models import MenuItem, Category
+from .serializers import MenuItemSerializer, CategorySerializer, MenuItemsWithCategorySerializer, \
+    MenuItemsWithCategoryFlattenSerializer
 
 menu_items = [
     {"id": 1, "name": "Tea", "price": 10.00, "category": "Beverage"},
@@ -41,4 +45,20 @@ def menu_item_old(request, id):
             return JsonResponse({"menu_item": item})
     return HttpResponse("Item - {} not found".format(id))
 
-# Apply CRUD using Django Rest Framework (DRF)
+# Apply CRUD using Django Rest Framework (DRF) - > ViewSets
+
+class MenuItemsViewSet(viewsets.ModelViewSet):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class MenuItemsWithCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemsWithCategorySerializer
+
+class MenuItemsWithCategoryFlattenViewSet(viewsets.ModelViewSet):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemsWithCategoryFlattenSerializer
