@@ -1,8 +1,13 @@
+from datetime import timedelta
+
 from django.db import models
+from core.models import TimeStampedModel
+from django.utils import timezone
+
 
 # Create your models here.
 
-class Order(models.Model):
+class Order(TimeStampedModel):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
@@ -19,10 +24,71 @@ class Order(models.Model):
                               )
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self):
         return "Order #{} - {}".format(self.id, self.customer_name)
+    """
+        Commenting becase implemented a base model in core app as part of Class 7.
+        file:///C:/Users/futur/OneDrive/Scaler/PYTHON/Academy-Feb26-Python-Backend-LLD-Batch/Class-07-Inheritance-IDs-Custom-Queries/index.html
+    """
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
 
+
+
+
+# Proxy model implementation using a manager - > Use same model but with a different behaviour
+class RecentOrderManager(models.Manager):
+    def get_queryset(self):
+        week_ago = timezone.now() - timedelta(days=7)
+        return super().get_queryset().filter(created_at__gte=week_ago)
+
+class RecentOrder(Order):
+    objects = RecentOrderManager()
+    class Meta:
+        proxy = True
+        ordering = ['-created_at']
+
+
+# Custom Raw SQL Query
+class OrderManager(models.Manager):
+    def ranked_orders_raw(self):
+        query = """
+            SELECT
+                id,
+                customer_name,
+                status,
+                total_amount,
+                RANK() OVER (
+                    PARTITION BY status
+                    ORDER BY total_amount DESC
+                ) AS status_rank
+            FROM orders_order
+        """
+        return self.raw(query)
+
+class OrderSpl(Order):
+    objects = OrderManager()
+    class Meta:
+        proxy = True
+
+
+"""
+    Testing Cardinalities - 
+    file:///C:/Users/futur/OneDrive/Scaler/PYTHON/Academy-Feb26-Python-Backend-LLD-Batch/Class-08-Cardinalities-N1-Migrations/index.html
+    This will do following:
+        a) Create a referce of Order model in OrderInvoice and store it in 'order'
+        b) as we are using related_name attribute, it DJANGO framework creates a reverse FK and creates a refernce of OrderInvoice
+           in Order model and store it in the object 'invoice'
+           
+        invoice.order -> returns Order model's object
+        order.invoice -> returns OrderInvoice model's object
+"""
+class OrderInvoice(TimeStampedModel):
+    invoice_number = models.CharField(max_length=20, unique=True)
+
+    # Defining cardinality using OneToOne Field
+    order = models.OneToOneField(Order,
+                                 on_delete=models.CASCADE,
+                                 related_name='invoice'
+                                 )
