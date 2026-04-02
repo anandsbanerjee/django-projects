@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import OrderViewSet, orders, OrderView, get_order_by_id, OrderListView, OrderDetailView, get_recent_orders, \
-    get_spl_orders, OrderInvoiceViewSet, OrderWithInvoiceViewSet
+    get_spl_orders, OrderInvoiceViewSet, OrderWithInvoiceViewSet, get_incomplete_orders
 
 #create a router
 router = routers.DefaultRouter()
@@ -21,6 +21,7 @@ urlpatterns = [
     path('orderlist/<int:order_id>', get_order_by_id, name='get_order_by_id'),
     path('orderlist/recent/', get_recent_orders, name='recent-orders'),
     path('orderlist/specials', get_spl_orders, name='special-orders'),
+    path('orderlist/incomplete', get_incomplete_orders, name='incomplete-orders'),
 
     #APIView class based views
     path('orders-summary/', OrderView.as_view(), name='orders-summary'),

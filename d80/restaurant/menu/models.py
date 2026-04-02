@@ -1,3 +1,4 @@
+from django.core.checks import Tags
 from django.db import models
 
 from core.models import TimeStampedModel
@@ -11,6 +12,10 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
     def __str__(self):
         return self.name
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
 
 class MenuItem(TimeStampedModel):
     name = models.CharField(max_length=100)
@@ -36,5 +41,15 @@ class MenuItem(TimeStampedModel):
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
 
+    """
+        ManyToMany cardinality with Tags
+    """
+    tags = models.ManyToManyField(
+                                    Tag,
+                                    related_name='menuitems',
+                                    blank=True
+                                  )
+
     def __str__(self):
         return "{} - {}".format(self.id, self.name)
+

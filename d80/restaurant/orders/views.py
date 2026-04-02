@@ -51,6 +51,14 @@ def get_order_by_id(request, order_id):
     serilizer = OrdersSerializer(order)
     return Response(serilizer.data)
 
+# Use of Custom Query Set - OrderQuerySet
+@api_view(['GET'])
+def get_incomplete_orders(request):
+    orders = Order.objects.in_complete()
+    serializer = OrdersSerializer(orders, many=True)
+    return Response(serializer.data)
+
+
 @api_view(['GET'])
 def get_recent_orders(request):
     recent_orders = RecentOrder.objects.all()

@@ -2,10 +2,18 @@ from datetime import timedelta
 
 from django.db import models
 from core.models import TimeStampedModel
+from django.db.models import Q
 from django.utils import timezone
+from menu.models import MenuItem
 
 
 # Create your models here.
+class OrderQuerySet(models.query.QuerySet):
+    def completed(self):
+        return self.filter(status='Completed')
+
+    def in_complete(self):
+        return self.filter(~Q(status='completed') & ~Q(status='confirmed'))
 
 class Order(TimeStampedModel):
     STATUS_CHOICES = [
@@ -24,8 +32,7 @@ class Order(TimeStampedModel):
                               )
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     notes = models.TextField(blank=True)
-    def __str__(self):
-        return "Order #{} - {}".format(self.id, self.customer_name)
+
     """
         Commenting becase implemented a base model in core app as part of Class 7.
         file:///C:/Users/futur/OneDrive/Scaler/PYTHON/Academy-Feb26-Python-Backend-LLD-Batch/Class-07-Inheritance-IDs-Custom-Queries/index.html
@@ -33,8 +40,19 @@ class Order(TimeStampedModel):
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
 
+    """
+        Implementing Many-To-Many cardinality with MenuItems using OrderItem model
+    """
+    menu_items = models.ManyToManyField(
+                                        MenuItem,
+                                        through= 'OrderItem',
+                                        related_name='orders'
+                                        )
 
+    objects = OrderQuerySet.as_manager()
 
+    def __str__(self):
+        return "Order #{} - {}".format(self.id, self.customer_name)
 
 
 # Proxy model implementation using a manager - > Use same model but with a different behaviour
@@ -91,4 +109,29 @@ class OrderInvoice(TimeStampedModel):
     order = models.OneToOneField(Order,
                                  on_delete=models.CASCADE,
                                  related_name='invoice'
-                                 )
+                               )
+"""
+    Through model class to join MenuItems and Order model
+    MenuItem 1 : n OrderItem n : 1 Order
+"""
+
+class OrderItem(TimeStampedModel):
+    order = models.ForeignKey(
+                                Order,
+                                on_delete=models.CASCADE,
+                                related_name='items'
+                              )
+
+    menu_item = models.ForeignKey(
+                                    MenuItem,
+                                    on_delete=models.PROTECT,
+                                    related_name='items'
+                                )
+    # Extra fields on the relationship!
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    class Meta:
+        unique_together = ['order', 'menu_item']
+
+
